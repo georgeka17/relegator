@@ -42,7 +42,7 @@ class Relegator:
             self.layers.append(tf.keras.layers.Dropout(self.input_dropout_frac,
                                                        input_shape=(self.n_inputs, )))
             self.layers.append(tf.keras.layers.Dense(self.hidden_layers_nodes[0],
-                                                     activation='relu',use_bias=self.bias)) #ModClf has 'relu' for activation, but RelegatorClf has 'softmax'
+                                                     activation='relu',use_bias=self.bias))
         else:
             self.layers.append(tf.keras.layers.Dense(self.hidden_layers_nodes[0],
                                                      input_dim=self.n_inputs,
@@ -56,57 +56,61 @@ class Relegator:
                                                  activation=self.output_activation))
         self.model = tf.keras.Sequential(self.layers)
 
-    def init_optimizer(self, lr=1e-3): #what does this method
+    def init_optimizer(self, lr=1e-3):
         self.learning_rate = lr
         self.optimizer = tf.keras.optimizers.Adam(lr=self.learning_rate)
 
-    def train_step(self, xs, y_truth, foms, mask, data_frac): #what is this for?
+    def train_step(self, xs, y_truth, foms, mask, data_frac): ?
         with tf.GradientTape() as tape:
             y_pred = self.model(xs, training=True)
-            loss_val = Relegator.loss_object(self, y_truth, y_pred, foms, mask, data_frac)
+            loss_val, signif = Relegator.loss_object(self, y_truth, y_pred, foms, mask, data_frac)
             acc_val = self.acc_object(y_truth, y_pred)
         grads = tape.gradient(loss_val, self.model.trainable_variables)
         self.optimizer.apply_gradients(zip(grads, self.model.trainable_variables))
-        return loss_val.numpy().mean(), acc_val.numpy().mean()
+        return loss_val.numpy().mean(), acc_val.numpy().mean(), signif
 
-    def predict_step(self, x, y_t, foms, mask, data_frac): #what is this for?
+    def predict_step(self, x, y_t, foms, mask, data_frac): 
         y_p = self.model(x, training=False)
-        loss_val = Relegator.loss_object(self, y_t, y_p, foms, mask, data_frac).numpy().mean()
+        loss_val, signif= Relegator.loss_object(self, y_t, y_p, foms, mask, data_frac)
+        loss_val = loss_val.numpy().mean()
         print(loss_val)
         acc_val = self.acc_object(y_t, y_p).numpy().mean()
         print(acc_val)
-        return loss_val, acc_val
+        return loss_val, acc_val, signif
 
     def train(self, train_ds, test_ds, max_epochs, ot_cutoff=True, ot_cutoff_depth=10): #These are the loops that the model goes through with the test and train data
         self.ot_cutoff = ot_cutoff
         self.ot_cutoff_depth = ot_cutoff_depth
         self.max_epochs = max_epochs
-        epochs, eval_loss, eval_accs, train_loss, train_accs, test_loss, test_accs, test_acc_sma, test_loss_sma = [], [], [], [], [], [], [], [], []
+        epochs, eval_loss, eval_accs, eval_signif, train_loss, train_accs, train_signif, test_loss, test_accs, test_signif, test_acc_sma, test_loss_sma = [], [], [], [], [], [], [], [], [], [], [], []
 
         for epoch in range(self.max_epochs):
-            epochs.append(epoch)
+            epochs.append(epoch) #for future plots of accuracy, loss, and significance vs epoch
             lv, av = 0, 0
             for (batch, (xs, ys)) in enumerate(train_ds):
-                lv, av = self.train_step(xs, ys, self.train_foms, self.train_peak_mask, 1-self.test_fraction)
+                lv, av, signif = self.train_step(xs, ys, self.train_foms, self.train_peak_mask, 1-self.test_fraction)
             print('Epoch {}/{} finished, learning rate: {:0.4f}'.format(epoch+1, self.max_epochs, self.optimizer.lr.numpy()))
             print('train loss: \t{:0.4f} \t|\ttrain acc: \t{:0.4f}'.format(lv, av))
-            train_loss.append(lv)
-            train_accs.append(av)
+            train_loss.append(lv) #for plots of loss vs epoch
+            train_accs.append(av) #for plots of accuracy vs epoch
+            train_signif.append(signif) #for plots of significance vs epoch
             for (batch, (xs, ys)) in enumerate(train_ds):
-                lv, av = self.predict_step(xs, ys, self.train_foms, self.train_peak_mask, 1-self.test_fraction)
+                lv, av, signif = self.predict_step(xs, ys, self.train_foms, self.train_peak_mask, 1-self.test_fraction)
             print('eval loss: \t{:0.4f} \t|\teval acc: \t{:0.4f}'.format(lv, av))
-            eval_loss.append(lv)
-            eval_accs.append(av)
+            eval_loss.append(lv) #for plots of loss vs epoch
+            eval_accs.append(av) #for plots of accuracy vs epoch
+            eval_signif.append(signif) #for plots of significance vs epoch
             for (batch, (xs, ys)) in enumerate(test_ds):
-                lv, av = self.predict_step(xs, ys, self.test_foms, self.test_peak_mask, self.test_fraction)
+                lv, av, signif = self.predict_step(xs, ys, self.test_foms, self.test_peak_mask, self.test_fraction)
             print('test loss: \t{:0.4f} \t|\ttest acc: \t{:0.4f}'.format(lv, av))
-            test_loss.append(lv)
-            test_accs.append(av)
+            test_loss.append(lv) #for plots of loss vs epoch
+            test_accs.append(av) #for plots of accuracy vs epoch
+            test_signif.append(signif) #for plots of significance vs epoch
             print()
 
             loss_slope = 0
             epos = []
-            if epoch + 1 > ot_cutoff_depth:
+            if epoch + 1 > ot_cutoff_depth: #checking to prevent overtraining of the model
                 epos = np.linspace(1, ot_cutoff_depth, ot_cutoff_depth)
                 loss_slope, _, _, _, _ = stats.linregress(epos, test_loss[-ot_cutoff_depth:])
 
@@ -116,18 +120,21 @@ class Relegator:
         dict = {'eps': epochs,
                 'eval_accs': eval_accs, 'eval_loss': eval_loss,
                 'train_loss': train_loss, 'train_accs': train_accs,
-                'test_loss': test_loss, 'test_accs': test_accs}
+                'test_loss': test_loss, 'test_accs': test_accs,
+                'eval_signif': eval_signif,
+                'train_signif': train_signif,
+                'test_signif': test_signif}
 
-        train_results_df = pd.DataFrame(dict)
+            
         print('\nmodel trained for ' + str(len(epochs)) + ' epochs')
         print('final train accuracy:\t' + str(train_accs[-1]))
         print('final test accuracy:\t' + str(test_accs[-1]))
-        self.train_results = train_results_df
+        self.train_results = train_results_df #results used by gen_master.py for plotting
 
     # # # # # # # # # # # # # # # # #
 
     def set_parameters(self, sig_idxs, bkgd_idxs, sig_frac, test_frac, train_ds, test_ds, fom_name = None, train_with_fom = False, fom_mean = 0, fom_width = 1e20): 
-    	# I created this to be one method that the user can call to set up all of their variables. this should help to clean things up on the front end.
+    	#One method that the user can call to set up all of their variables. Cleans things up on the front end.
         self.signal_idx = sig_idxs 
         self.background_idxs = bkgd_idxs
 
@@ -158,8 +165,6 @@ class Relegator:
         peak_mask[peak_idxs] = 1
         return peak_mask
 
-    #i've reviewed the code u6p until this point.
-
     def signif_proba(self, y_truth, y_pred, foms, mask, data_frac):
         sig_mask  = tf.cast(tf.slice(y_truth, [0, self.signal_idx,], [len(y_truth), 1]), tf.float32)
         bkgd_mask = tf.cast(tf.slice(y_truth, [0, self.background_idxs[0],], [len(y_truth), 1]), tf.float32)
@@ -177,7 +182,7 @@ class Relegator:
         return signif
         
     def signif_function(self, n_S, n_B, sig_frac):
-        signif = tf.math.divide(n_S * sig_frac, tf.math.sqrt(n_S * sig_frac + n_B * (1 - sig_frac)))
+        signif = tf.math.divide(n_S * sig_frac, tf.math.sqrt(n_S * sig_frac + n_B * (1 - sig_frac))) #calculation of the statistical significance
         return signif
 
     def loss_object(self, y_truth, y_pred, foms, mask, data_frac):
@@ -185,7 +190,7 @@ class Relegator:
         signif = self.signif_proba(y_truth, y_pred, foms, mask, data_frac)
 
         rel_ent = self.relegator_cce(y_truth, y_pred)
-        return rel_ent + tf.math.divide(1, signif)
+        return rel_ent + tf.math.divide(1, signif), signif #add the inverse of the significance so that significance is optimized in the loss function
         # return tf.keras.losses.categorical_crossentropy(y_truth, y_pred)
 
     def relegator_cce(self, y_truth, y_pred):
