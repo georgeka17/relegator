@@ -115,14 +115,16 @@ if self.ot_cutoff and epoch + 1 > self.ot_cutoff_depth and loss_slope >= 0:
 
 'gen_master.py' produces some basic plots of the results.
 
-Boundary plot: Here we can see the data being plotted, along with the boundaries that were drawn to classify the regions. The area shaded grey is the *relegated region*, in which these data points were excluded when drawing the boundary between the orange and blue moons. 
+**Boundary Plot:** Here we can see the data being plotted, along with the boundaries that were drawn to classify the regions. The area shaded grey is the *relegated region*, in which these data points were excluded when drawing the boundary between the orange and blue moons. 
+
+These results are not robust, as they vary greatly as the *noise* and *n_train_events* parameters change. In some runs, the relegator class does not behave as expected and omits a large portion of the data or does not omit any data at all.
 
 ![Alt](/noise_0.2_n_train_25000_run3.png "Boundary_Plot")
 
-Histogram: The left plots show the gaussian distribution of the masses before the peak mask is applied. The right plots show the gaussian distribution after the peak mask is applied and we can see the increase in statistical significance of the signal sample.
+**Histogram:** The left plots show the gaussian distribution of the masses before the peak mask is applied. The right plots show the gaussian distribution after the peak mask is applied and we can see the increase in statistical significance of the signal sample.
 
 ![Alt](\masses_hist_successful.png "Masses_Histogram")
 
-Accuracy, Loss, and Significance vs. Epoch: The training loop in `relegator.py` keeps lists of accuracy, loss, and significance for the train, test, and evaluation data for each epoch. In this plot we can see how these values evolved as the model trained.
+**Accuracy, Loss, and Significance vs. Epoch:** The training loop in `relegator.py` keeps lists of accuracy, loss, and significance for the train, test, and evaluation data for each epoch. In this plot we can see how these values evolved as the model trained.
 
 ![Alt](/stats_v_epoch.png "Stats")
