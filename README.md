@@ -7,7 +7,7 @@ Machine learning models are used to classify signal and background, a process cr
 These instructions will get you a copy of the project up and running on your local machine.
 
 ### Prerequisites
-To run the code, you need the following python packages: `numpy`, `scipy`, `scikit-learn`, `pandas`, and `tensorflow`. To create plots for the results, you will also need the `matplotlib` package, as well as the modules from `moons_tools_2.py` in this repo for plotting functionality for our particular sample. The sample code is designed to be run from the command line and this can be done with python's `sys` module. 
+To run the code, you need the following python packages: `numpy`, `scipy`, `scikit-learn`, `pandas`, and `tensorflow`. To create plots for the results, you will also need the `matplotlib` package. For this use case, you will also need the modules from [moons_tools_2.py](https://github.com/georgeka17/relegator/blob/master/moons_tools_2.py) for plotting functionality and [make_datasets_2_gen.py](https://github.com/georgeka17/relegator/blob/master/make_datasets_2_gen.py) to generate a new dataset. The sample code is designed to be run from the command line and this can be done with python's `sys` module. 
 
 It is important to use TensorFlow 2.0 so that we can utilize the *eager execution* feature, which allows us to monitor the results in between training and makes the neural network more efficient, which reduces our train time. 
 
@@ -90,11 +90,11 @@ releg.set_parameters(1, [0], sig_frac, test_frac, X_train, X_test, 'm', False, m
 ```
 After converting `X_train`, `X_test`, `y_train`, and `y_test` to TensorFlow datasets, we generate peak masks that subtract off the background events using `relegator.gen_peak_masks()`.
 
-Before the training begins, users can print a summary of their model that will look like this:
+Before the training begins, users can print a summary of their model that will look something like this:
 
 ![Alt](/summary.png "Summary")
 
-After model has finished training, gen_master contains some [plotting functionality](#plots) that you may find useful.
+After the model has finished training, gen_master contains some [plotting functionality](#plots) that you may find useful.
 
 ### relegator
 
