@@ -16,19 +16,17 @@ class Relegator:
         self.hidden_layers_nodes = None
         self.bias = None
         self.n_inputs = 0
-        self.n_outputs = 0 #this was part of ModClf
-
-        #what are both of these?
+        self.n_outputs = 0 
+        
         self.loss_object = None
         self.acc_object = tf.keras.metrics.CategoricalAccuracy()
 
         self.output_activation = 'softmax'
         self.name = 'relegation classifier'
         self.loss_type = 'rel. entropy + 1/sigma' 
-    #should the user determine the model architecture?
-
+    
     def build_model(self, nodes=[20,20,10], bias=True, n_ins=2, n_outs=1,
-                    input_dropout=0.05): # setting up the model
+                    input_dropout=0.05): # setting up the model -- called by gen_master with parameters from json file.
         self.hidden_layers_nodes = nodes
         self.n_hidden_layers = len(self.hidden_layers_nodes)
         self.bias = bias
@@ -59,7 +57,7 @@ class Relegator:
         self.learning_rate = lr
         self.optimizer = tf.keras.optimizers.Adam(lr=self.learning_rate)
 
-    def train_step(self, xs, y_truth, foms, mask, data_frac): ?
+    def train_step(self, xs, y_truth, foms, mask, data_frac):
         with tf.GradientTape() as tape:
             y_pred = self.model(xs, training=True)
             loss_val, signif = Relegator.loss_object(self, y_truth, y_pred, foms, mask, data_frac)
