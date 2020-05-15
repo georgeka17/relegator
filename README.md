@@ -102,7 +102,7 @@ Training begins in `gen_master.py` in the following way:
 ```python
 releg.train(train_ds, test_ds, n_epochs, ot_cutoff, ot_cutoff_depth)
 ```
-Once the training begins, the relegator class is autonomous in that the training proceeds without any user input. 
+Once the training begins, the relegator class is autonomous in that the training proceeds without any user input. The loss function takes the significance into account by adding the inverse of the significance.
 
 Note that we prevent overtraining by comparing `ot_cutoff` to `ot_cutoff_depth`.
 ```python 
