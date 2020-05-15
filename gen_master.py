@@ -69,7 +69,7 @@ if len(config_pars['data']['train_data_file']) == 0: #dataset has not been gener
     train_df = make_moons_mass(n_evts, min_fom, max_fom,
                                mean=mean_fom, sigma=width_fom,
                                noise=noise, angle=angle, beta=bkgd_beta)
-else:
+else: #dataset was already generated and we can load it in as a dataframe
     print('unpickling training dataset from ' + config_pars['data']['train_data_file'])
     with open(config_pars['data']['train_data_file'], 'rb') as f:
         train_df = pickle.load(f)
@@ -95,16 +95,18 @@ ot_cutoff = config_pars['run']['ot_cutoff'] # True
 
 releg = Relegator()
 
-#prepare the dataset for training
+#prepare the dataset for training -- drop labels, train/test split
 
 train_df.drop(['label', 'label_0', 'label_1'], axis=1, inplace=True)
 X_train, X_test, y_train, y_test = train_test_split(train_df, y, test_size=test_frac)
 
+#identifying the feature of merit
 masses_train = X_train['m']
 masses_test = X_test['m']
 
 #set up parameters for the model to train on.
 releg.set_parameters(1, [0], sig_frac, test_frac, X_train, X_test, 'm', False, mean_fom, width_fom)
+#classification goes as: [background, signal, relegated]
 
 n_inputs = len(X_train.columns)
 n_outputs = len(y_train.columns) # number of inputs + 1, to index the relegated data.
@@ -150,25 +152,6 @@ plt.xlabel('epoch')
 y_pred_train, y_pred_test = [], []
 
 ax = plt.subplot(n_rows, n_cols, 3)
-
-#y_1hot_pred_train = releg.model.predict(X_train)
-#y_pred_train = y_1hot_pred_train.argmax(axis=1)
-
-#y_1hot_pred_test = releg.model.predict(X_test)
-#y_pred_test = y_1hot_pred_test.argmax(axis=1)
-
-# confusion matrices... plot from test only
-#print('\ntesting results...')
-# class_labels = ['type 0', 'type 1']
-#class_labels = ['background', 'signal']
-#class_labels.append('releg.')
-
-#y_test = np.append(y_test, [[0, 0, 1]], axis=0)
-#y_1hot_pred_test = np.append(y_1hot_pred_test, [[0,0,1]], axis=0)
-
-#plot_confusion_matrix(y_test.argmax(axis=1), y_1hot_pred_test.argmax(axis=1), class_labels, ax, normalize=True, title='confusion matrix, test')
-
-#plt.tight_layout()
 opt_thr = 0.0
 
 #decision boundary plots
