@@ -114,7 +114,7 @@ if self.ot_cutoff and epoch + 1 > self.ot_cutoff_depth and loss_slope >= 0:
 
 ## Plots
 
-'gen_master.py' produces some basic plots of the results.
+`gen_master.py` produces some basic plots of the results.
 
 **Boundary Plot:** Here we can see the data being plotted, along with the boundaries that were drawn to classify the regions. The area shaded grey is the *relegated region*, in which these data points were excluded when drawing the boundary between the orange and blue moons. 
 
