@@ -117,7 +117,7 @@ if self.ot_cutoff and epoch + 1 > self.ot_cutoff_depth and loss_slope >= 0:
 
 **Boundary Plot:** Here we can see the data being plotted, along with the boundaries that were drawn to classify the regions. The area shaded grey is the *relegated region*, in which these data points were excluded when drawing the boundary between the orange and blue moons. 
 
-These results are not robust, as they vary greatly as the *noise* and *n_train_events* parameters change. In some runs, the relegator class does not behave as expected and omits a large portion of the data or does not omit any data at all. See the [boundary plots] (https://github.com/georgeka17/relegator/tree/master/boundary_plotsfolder) to observe this behavior.
+These results are not robust, as they vary greatly as the *noise* and *n_train_events* parameters change. In some runs, the relegator class does not behave as expected and omits a large portion of the data or does not omit any data at all. See the [boundary plots](https://github.com/georgeka17/relegator/tree/master/boundary_plots) folder to observe this behavior.
 
 ![Alt](/noise_0.2_n_train_25000_run3.png "Boundary_Plot")
 
