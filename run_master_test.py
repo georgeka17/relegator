@@ -8,7 +8,7 @@ import json
 import numpy as np
 import sys
 
-ts = ['relegator'] #only testing relegator classifier here.
+ts = ['relegator'] #only testing relegator classifier here, but can add others (binary softmax, regressor) for comparison
 #, 'mod_binary']
 # ts = ['relegator_factor'] #, 'mod_binary']
 n_noise = 1
@@ -19,19 +19,17 @@ pow_range = (.1,1.1)
 noises = [0.2]
 
 n_trials = 1 #only run the model one time
-n_train_events = 25000 #are we training in batches?
-n_weighted_events = 100000 #is this the total? I don't see this show up anywhere in the code.
-
+n_train_events = 25000 
+n_weighted_events = 100000 
 for n in noises:
     noise = n
     train_file_name = './datasets/train_ds_' + str(n_train_events)
-    train_file_name += '_' + str(np.round(noise,4)) + '.pkl' #changed np.round(sig_frac,4 ) to np.round(noise,4)
+    train_file_name += '_' + str(np.round(noise,4)) + '.pkl' 
     weight_file_name = './datasets/weighted_ds_' + str(n_weighted_events)
-    weight_file_name += '_' + str(np.round(noise,4)) + '.pkl' #changed np.round(sig_frac,4 ) to np.round(noise,4)
+    weight_file_name += '_' + str(np.round(noise,4)) + '.pkl' 
     print(train_file_name)
     print(weight_file_name)
-    for t in ts:
-        # print(sig_frac)
+    for t in ts: #iterating over the types of classifiers, if comparing performance
         json_str = "{ \n \
         \"data\": { \n \
         \"n_events\": " + str(n_train_events) + ", \n \
@@ -71,7 +69,7 @@ for n in noises:
             f.write(json_str)
         if t == ts[0]:
             cmd = "python make_datasets_2_gen.py config_run.json"
-            print(t, noise) #changed (t, sig_frac) to (t, noise)
+            print(t, noise)
             print(cmd)
             os.system(cmd)
         for j in range(n_trials):
