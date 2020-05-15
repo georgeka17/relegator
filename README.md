@@ -25,6 +25,7 @@ The sample dataset being used is scikit-learn's *moons* dataset, which makes two
 
 ![Alt](/moons_example.png "Moons_Data")
 
+The three files of utility are:
 1. run_master_test.py
 2. gen_master.py
 3. relegator.py
