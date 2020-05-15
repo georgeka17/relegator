@@ -18,7 +18,6 @@ class Relegator:
         self.n_inputs = 0
         self.n_outputs = 0 #this was part of ModClf
 
-
         #what are both of these?
         self.loss_object = None
         self.acc_object = tf.keras.metrics.CategoricalAccuracy()
