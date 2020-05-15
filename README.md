@@ -123,7 +123,7 @@ These results are not robust, as they vary greatly as the *noise* and *n_train_e
 
 **Histogram:** The left plots show the gaussian distribution of the masses before the peak mask is applied. The right plots show the gaussian distribution after the peak mask is applied and we can see the increase in statistical significance of the signal sample.
 
-![Alt](\masses_hist_successful.png "Masses_Histogram")
+![Alt](/masses_hist_successful.png "Masses_Histogram")
 
 **Accuracy, Loss, and Significance vs. Epoch:** The training loop in `relegator.py` keeps lists of accuracy, loss, and significance for the train, test, and evaluation data for each epoch. In this plot we can see how these values evolved as the model trained.
 
